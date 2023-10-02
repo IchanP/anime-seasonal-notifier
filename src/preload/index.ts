@@ -2,7 +2,13 @@ import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {}
+const api = {
+  test: async (): Promise<void> => {
+    const response = await fetch('https://api.jikan.moe/v4/seasons/now')
+    const body = await response.json()
+    return body
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

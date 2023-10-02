@@ -1,7 +1,10 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, Menu, net } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import appIcon from '../renderer/src/assets/fixedEresh.png?asset'
+
+Menu.setApplicationMenu(null)
 
 function createMainWindow(): void {
   // Create the browser window.
@@ -9,7 +12,15 @@ function createMainWindow(): void {
     width: 900,
     height: 670,
     show: false,
-    autoHideMenuBar: true,
+    icon: appIcon,
+    title: 'Anime Viewer',
+    // titlebar is known to give false security message on v22, enableBlinkFeatures
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#1a1a1f',
+      symbolColor: '#a2b1b4',
+      height: 40
+    },
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -20,6 +31,8 @@ function createMainWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
+
+  mainWindow.webContents.openDevTools()
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -38,8 +51,8 @@ function createMainWindow(): void {
 function createSubWindow(): void {
   // Create sub window
   const subWindow = new BrowserWindow({
-    width: 50,
-    height: 50,
+    width: 0,
+    height: 0,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -49,9 +62,7 @@ function createSubWindow(): void {
     }
   })
 
-  subWindow.on('ready-to-show', () => {
-    subWindow.show()
-  })
+  subWindow.webContents.openDevTools()
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
@@ -77,7 +88,7 @@ app.whenReady().then(() => {
   })
 
   createMainWindow()
-  createSubWindow()
+  //  createSubWindow()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
